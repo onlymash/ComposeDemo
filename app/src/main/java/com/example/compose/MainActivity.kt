@@ -5,10 +5,14 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -131,12 +135,18 @@ fun CollapsingScaffold() {
 				.fillMaxSize()
 				.nestedScroll(nestedScrollConnection)
 				.padding(
-					top = ((topBarHeight + topBarOffset ) / LocalDensity.current.density).dp,
+					top = ((topBarHeight + topBarOffset) / LocalDensity.current.density).dp,
 					bottom = ((bottomBarHeight - bottomBarOffset) / LocalDensity.current.density).dp
 				)
 		) { page ->
+
 			// 每个页面内部使用可滚动组件，如 LazyColumn
-			LazyColumn(modifier = Modifier.fillMaxSize()) {
+			LazyColumn(
+				modifier = Modifier.fillMaxSize(),
+				contentPadding = PaddingValues(
+					bottom = WindowInsets.safeDrawing.asPaddingValues().calculateBottomPadding()
+				)
+			) {
 				items(50) { index ->
 					Text(
 						text = "页面 $page - 项目 $index",
