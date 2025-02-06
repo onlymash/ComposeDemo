@@ -1,10 +1,12 @@
 package com.example.compose
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
@@ -14,25 +16,34 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -48,6 +59,7 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.window.layout.DisplayFeature
+import com.example.compose.extensions.pxToDp
 import com.example.compose.ui.theme.ComposeDemoTheme
 import com.google.accompanist.adaptive.calculateDisplayFeatures
 import kotlin.math.roundToInt
@@ -85,12 +97,12 @@ fun DemoApp(
 	windowSize: WindowSizeClass,
 	displayFeatures: List<DisplayFeature>
 ) {
-	CollapsingScaffold()
+	Test()
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CollapsingScaffold() {
+fun HomeScreen() {
 	// 使用记住的值来保存高度
 	var topBarHeight by remember { mutableFloatStateOf(0f) }
 	var bottomBarHeight by remember { mutableFloatStateOf(0f) }
@@ -193,6 +205,70 @@ fun CollapsingScaffold() {
 				selected = false,
 				onClick = {}
 			)
+		}
+	}
+}
+
+
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun Test() {
+
+	val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
+
+	var selectedTabIndex by remember { mutableIntStateOf(0) }
+	val tabs = listOf("Menu", "Favorite")
+
+	var topBarHeight by remember { mutableFloatStateOf(0f) }
+
+	Scaffold(
+		modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+		topBar = {
+			CenterAlignedTopAppBar(
+				modifier = Modifier.onSizeChanged { size ->
+					topBarHeight = size.height.toFloat()
+				},
+				title = { Text(text = "Scroll Behavior Test") },
+				navigationIcon = {
+					IconButton(onClick = {
+
+					}) {
+						Icon(imageVector = Icons.Default.Home, contentDescription = "")
+					}
+				},
+				scrollBehavior = scrollBehavior,
+				colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+					scrolledContainerColor = MaterialTheme.colorScheme.surface
+				)
+			)
+		}
+	) {
+		Column(
+			modifier = Modifier
+				.fillMaxSize()
+				.padding(top = topBarHeight.pxToDp)
+		) {
+			TabRow(
+				selectedTabIndex = selectedTabIndex,
+				modifier = Modifier.fillMaxWidth()
+			) {
+				tabs.forEachIndexed { index, title ->
+					Tab(
+						selected = selectedTabIndex == index,
+						onClick = { selectedTabIndex = index },
+						text = { Text(title) }
+					)
+				}
+			}
+			LazyColumn(
+				modifier = Modifier.fillMaxWidth(),
+				contentPadding = PaddingValues(bottom = WindowInsets.safeDrawing.asPaddingValues().calculateBottomPadding())
+			) {
+				items((1..50).toList()) { item ->
+					Text(modifier = Modifier.padding(8.dp), text = "Item $item")
+				}
+			}
 		}
 	}
 }
