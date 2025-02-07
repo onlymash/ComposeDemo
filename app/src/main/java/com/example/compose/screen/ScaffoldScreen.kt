@@ -11,7 +11,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
@@ -54,7 +56,8 @@ fun ScaffoldScreen() {
 
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(topAppBarState)
 
-    val tabs = listOf("Menu", "Favorite")
+    val tabsText = listOf("Menu", "Favorite")
+    val tabsIcons = listOf(Icons.Default.Home, Icons.Default.Favorite)
 
     var topBarHeight by remember { mutableFloatStateOf(0f) }
 
@@ -63,6 +66,8 @@ fun ScaffoldScreen() {
     val pagerState = rememberPagerState(pageCount = { 2 })
 
     val animationScope = rememberCoroutineScope()
+
+    val listStates = List(2) { rememberLazyListState() }
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -93,24 +98,23 @@ fun ScaffoldScreen() {
                 NavigationBar(
                     modifier = Modifier.fillMaxWidth(),
                 ) {
-                    NavigationBarItem(
-                        icon = { Icon(Icons.Default.Home, contentDescription = "Home") },
-                        selected = pagerState.currentPage == 0,
-                        onClick = {
-                            animationScope.launch {
-                                pagerState.animateScrollToPage(0)
+                    tabsText.forEachIndexed { index, name ->
+                        NavigationBarItem(
+                            icon = { Icon(tabsIcons[index], contentDescription = name) },
+                            selected = pagerState.currentPage == index,
+                            onClick = {
+                                if (pagerState.currentPage == index) {
+                                    animationScope.launch {
+                                        listStates[index].scrollToItem(0)
+                                    }
+                                } else {
+                                    animationScope.launch {
+                                        pagerState.animateScrollToPage(index)
+                                    }
+                                }
                             }
-                        }
-                    )
-                    NavigationBarItem(
-                        icon = { Icon(Icons.Default.Favorite, contentDescription = "Favorite") },
-                        selected = pagerState.currentPage == 1,
-                        onClick = {
-                            animationScope.launch {
-                                pagerState.animateScrollToPage(1)
-                            }
-                        }
-                    )
+                        )
+                    }
                 }
             }
 
@@ -125,12 +129,18 @@ fun ScaffoldScreen() {
                 selectedTabIndex = pagerState.currentPage,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                tabs.forEachIndexed { index, title ->
+                tabsText.forEachIndexed { index, title ->
                     Tab(
                         selected = pagerState.currentPage == index,
                         onClick = {
-                            animationScope.launch {
-                                pagerState.animateScrollToPage(index)
+                            if (pagerState.currentPage == index) {
+                                animationScope.launch {
+                                    listStates[index].scrollToItem(0)
+                                }
+                            } else {
+                                animationScope.launch {
+                                    pagerState.animateScrollToPage(index)
+                                }
                             }
                         },
                         text = { Text(title) }
@@ -144,6 +154,7 @@ fun ScaffoldScreen() {
 
                 LazyColumn(
                     modifier = Modifier.fillMaxWidth(),
+                    state = listStates[page],
                     contentPadding = PaddingValues(
                         bottom = WindowInsets.safeDrawing.asPaddingValues().calculateBottomPadding()
                     )
