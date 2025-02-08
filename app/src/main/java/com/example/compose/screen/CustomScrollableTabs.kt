@@ -3,6 +3,7 @@ package com.example.compose.screen
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRowDefaults
@@ -23,7 +24,7 @@ import kotlin.math.min
 fun CustomScrollableTabs(
     modifier: Modifier = Modifier,
     contentAlignment: Alignment = Alignment.TopStart,
-    selectedTabIndex: Int,
+    pagerState: PagerState,
     tabs: List<String>,
     onClickTab: (Int) -> Unit,
 ) {
@@ -51,18 +52,18 @@ fun CustomScrollableTabs(
                 //This part is the real scrollable tab layout
                 ScrollableTabRow(
                     modifier = Modifier.fillMaxWidth(),
-                    selectedTabIndex = selectedTabIndex,
+                    selectedTabIndex = pagerState.currentPage,
                     edgePadding = 0.dp,
                     divider = {},
                     indicator = { tabPositions ->
                         TabRowDefaults.PrimaryIndicator(
-                            Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex])
+                            Modifier.tabIndicatorOffset(tabPositions[pagerState.currentPage])
                         )
                     }
                 ) {
                     tabs.forEachIndexed { index, tab ->
                         Tab(
-                            selected = index == selectedTabIndex,
+                            selected = index == pagerState.currentPage,
                             onClick = { onClickTab(index) }
                         ) {
                             Text(
