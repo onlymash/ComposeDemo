@@ -11,9 +11,11 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
@@ -31,6 +33,7 @@ import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
+import androidx.compose.material3.TopAppBarState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -40,6 +43,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.tooling.preview.Preview
@@ -47,6 +51,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.example.compose.extensions.pxToDp
 import com.example.compose.ui.theme.ComposeDemoTheme
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
@@ -63,9 +68,6 @@ fun ScaffoldScreen() {
     val tabsIcons = listOf(Icons.Default.Home, Icons.Default.Favorite)
 
     var topBarHeight by remember { mutableFloatStateOf(0f) }
-
-    val isTopBarVisible = topAppBarState.collapsedFraction == 0f
-
     val pagerState = rememberPagerState(pageCount = { 2 })
 
     val animationScope = rememberCoroutineScope()
@@ -80,36 +82,14 @@ fun ScaffoldScreen() {
             }
         },
         bottomBar = {
-            var navBarHeight by remember { mutableIntStateOf(0) }
-            NavigationBar(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .onSizeChanged { size ->
-                        navBarHeight = size.height
-                    }
-                    .offset {
-                        IntOffset(x = 0, y = (navBarHeight * topAppBarState.collapsedFraction).roundToInt())
-                    },
-            ) {
-                tabsText.forEachIndexed { index, name ->
-                    NavigationBarItem(
-                        icon = { Icon(tabsIcons[index], contentDescription = name) },
-                        selected = pagerState.currentPage == index,
-                        onClick = {
-                            if (pagerState.currentPage == index) {
-                                animationScope.launch {
-                                    listStates[index].scrollToItem(0)
-                                }
-                            } else {
-                                animationScope.launch {
-                                    pagerState.animateScrollToPage(index)
-                                }
-                            }
-                        }
-                    )
-                }
-            }
-
+            MyBottomBar(
+                tabsText = tabsText,
+                tabsIcons = tabsIcons,
+                pagerState = pagerState,
+                animationScope = animationScope,
+                listStates = listStates,
+                topAppBarState = topAppBarState
+            )
         }
     ) {
         Column(
@@ -194,4 +174,45 @@ fun MyTopBar(
             scrolledContainerColor = MaterialTheme.colorScheme.surface
         )
     )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MyBottomBar(
+    tabsText: List<String>,
+    tabsIcons: List<ImageVector>,
+    pagerState: PagerState,
+    animationScope: CoroutineScope,
+    listStates: List<LazyListState>,
+    topAppBarState: TopAppBarState
+) {
+    var navBarHeight by remember { mutableIntStateOf(0) }
+    NavigationBar(
+        modifier = Modifier
+            .fillMaxWidth()
+            .onSizeChanged { size ->
+                navBarHeight = size.height
+            }
+            .offset {
+                IntOffset(x = 0, y = (navBarHeight * topAppBarState.collapsedFraction).roundToInt())
+            },
+    ) {
+        tabsText.forEachIndexed { index, name ->
+            NavigationBarItem(
+                icon = { Icon(tabsIcons[index], contentDescription = name) },
+                selected = pagerState.currentPage == index,
+                onClick = {
+                    if (pagerState.currentPage == index) {
+                        animationScope.launch {
+                            listStates[index].scrollToItem(0)
+                        }
+                    } else {
+                        animationScope.launch {
+                            pagerState.animateScrollToPage(index)
+                        }
+                    }
+                }
+            )
+        }
+    }
 }
