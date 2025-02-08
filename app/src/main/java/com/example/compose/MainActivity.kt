@@ -12,7 +12,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.window.layout.DisplayFeature
-import com.example.compose.screen.ScaffoldScreen
+import com.example.compose.screen.MainScreen
 import com.example.compose.ui.theme.ComposeDemoTheme
 import com.google.accompanist.adaptive.calculateDisplayFeatures
 
@@ -49,5 +49,5 @@ fun DemoApp(
     windowSize: WindowSizeClass,
     displayFeatures: List<DisplayFeature>
 ) {
-    ScaffoldScreen()
+    MainScreen()
 }
