@@ -1,6 +1,7 @@
 package com.example.compose.screen
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
@@ -18,15 +19,12 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.ScrollableTabRow
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRowDefaults
-import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -39,6 +37,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onSizeChanged
@@ -193,34 +192,25 @@ fun MyTabRow(
 
     val animationScope = rememberCoroutineScope()
 
-    ScrollableTabRow(
-        selectedTabIndex = pagerState.currentPage,
+    CustomScrollableTabs(
         modifier = Modifier.fillMaxWidth(),
-        edgePadding = 0.dp,
-        indicator = { tabPositions ->
-            TabRowDefaults.PrimaryIndicator(
-                Modifier.tabIndicatorOffset(tabPositions[pagerState.currentPage])
-            )
+        selectedTabIndex = pagerState.currentPage,
+        contentAlignment = Alignment.Center,
+        tabs = tabs,
+        onClickTab = { index ->
+            if (pagerState.currentPage == index) {
+                animationScope.launch {
+                    scrollToTop(index)
+                }
+            } else {
+                animationScope.launch {
+                    pagerState.animateScrollToPage(index)
+                }
+            }
         }
-    ) {
-        tabs.forEachIndexed { index, title ->
-            Tab(
-                selected = pagerState.currentPage == index,
-                onClick = {
-                    if (pagerState.currentPage == index) {
-                        animationScope.launch {
-                            scrollToTop(index)
-                        }
-                    } else {
-                        animationScope.launch {
-                            pagerState.animateScrollToPage(index)
-                        }
-                    }
-                },
-                text = { Text(title) }
-            )
-        }
-    }
+    )
+
+    HorizontalDivider(Modifier.fillMaxWidth())
 }
 
 @Composable
