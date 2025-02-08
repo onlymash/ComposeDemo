@@ -46,6 +46,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -67,7 +68,7 @@ fun ScaffoldScreen() {
     val tabsText = listOf("Menu", "Favorite")
     val tabsIcons = listOf(Icons.Default.Home, Icons.Default.Favorite)
 
-    var topBarHeight by remember { mutableFloatStateOf(0f) }
+    var topBarHeight by remember { mutableIntStateOf(0) }
     val pagerState = rememberPagerState(pageCount = { 2 })
 
     val animationScope = rememberCoroutineScope()
@@ -153,13 +154,13 @@ fun ScaffoldScreenPreview() {
 @Composable
 fun MyTopBar(
     scrollBehavior: TopAppBarScrollBehavior,
-    onHeightsChanged: (height: Float) -> Unit
+    onHeightsChanged: (height: Int) -> Unit
 ) {
     CenterAlignedTopAppBar(
         modifier = Modifier
             .fillMaxWidth()
             .onSizeChanged { size ->
-                onHeightsChanged(size.height.toFloat())
+                onHeightsChanged(size.height)
             },
         title = { Text(text = "Scroll Behavior Test") },
         navigationIcon = {
