@@ -20,7 +20,7 @@ data class Page(
 
 fun PageType.getTabs(): List<String> {
     return when (this) {
-        PageType.HOME -> listOf("Post", "Popular", "Pools", "Tags")
+        PageType.HOME -> listOf("Posts", "Popular", "Pools", "Tags")
         PageType.BOORUS -> listOf("All", "Danbooru", "Moebooru", "Gelbooru")
         PageType.DOWNLOADS -> listOf("All", "Completed", "Queued", "Failed")
     }
